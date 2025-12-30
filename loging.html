@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Contact Form</title>
+  <title>Contact Us</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     * {
@@ -10,8 +14,8 @@
     }
 
     body {
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      font-family: "Inter", "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #8b5cf6, #4338ca);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -20,18 +24,19 @@
     }
 
     .box {
-      background: #ffffff;
-      width: 380px;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-      animation: fadeIn 0.8s ease-in-out;
+      width: 400px;
+      padding: 32px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+      animation: fadeIn 0.7s ease;
     }
 
     @keyframes fadeIn {
       from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(24px);
       }
       to {
         opacity: 1;
@@ -40,54 +45,87 @@
     }
 
     h2 {
+      margin: 0;
       text-align: center;
-      margin-bottom: 20px;
-      color: #1f2933;
+      color: #111827;
+      font-size: 26px;
     }
 
-    input, textarea {
-      width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
       font-size: 14px;
-      transition: border 0.3s, box-shadow 0.3s;
+      margin: 8px 0 22px;
     }
 
-    input:focus, textarea:focus {
+    .field {
+      margin-bottom: 14px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-size: 14px;
+      background: #f9fafb;
+      transition: all 0.25s ease;
+      font-family: inherit;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #9ca3af;
+    }
+
+    input:focus,
+    textarea:focus {
       outline: none;
       border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
     }
 
     textarea {
       resize: none;
-      height: 90px;
+      height: 100px;
     }
 
     button {
       width: 100%;
-      margin-top: 18px;
-      padding: 12px;
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
-      color: white;
+      margin-top: 8px;
+      padding: 14px;
+      border-radius: 12px;
       border: none;
-      border-radius: 6px;
       font-size: 15px;
       font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4);
+      box-shadow: 0 14px 28px rgba(79, 70, 229, 0.45);
     }
 
     button:active {
       transform: translateY(0);
       box-shadow: none;
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .note {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 12px;
+      color: #6b7280;
     }
   </style>
 </head>
@@ -96,16 +134,34 @@
 
   <div class="box">
     <h2>Contact Us</h2>
+    <p class="subtitle">We’d love to hear from you</p>
 
     <form id="form">
-      <input type="text" id="name" placeholder="Your Name" required>
-      <input type="email" id="email" placeholder="Your Email" required>
-      <input type="text" id="subject" placeholder="Subject">
-      <textarea id="message" placeholder="Your Message" required></textarea>
-      <button type="submit">Send Message</button>
+      <div class="field">
+        <input type="text" id="name" placeholder="Your Name" required>
+      </div>
+
+      <div class="field">
+        <input type="email" id="email" placeholder="Your Email" required>
+      </div>
+
+      <div class="field">
+        <input type="text" id="subject" placeholder="Subject (optional)">
+      </div>
+
+      <div class="field">
+        <textarea id="message" placeholder="Your Message" required></textarea>
+      </div>
+
+      <button type="submit" id="submitBtn">
+        Send Message
+      </button>
+
+      <p class="note">We usually reply within 24 hours.</p>
     </form>
   </div>
 
+  <!-- Appwrite SDK -->
   <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
 
   <script>
@@ -117,9 +173,13 @@
       .setProject("6953c958000f8efa1324");
 
     const form = document.getElementById("form");
+    const submitBtn = document.getElementById("submitBtn");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending...";
 
       const nameValue = document.getElementById("name").value.trim();
       const emailValue = document.getElementById("email").value.trim();
@@ -128,8 +188,8 @@
 
       try {
         await databases.createDocument(
-          "6953d2a100006e85090d",     // Database ID
-          "loging_table",             // Collection ID
+          "6953d2a100006e85090d", // Database ID
+          "loging_table",        // Collection ID
           Appwrite.ID.unique(),
           {
             name: nameValue,
@@ -139,12 +199,15 @@
           }
         );
 
-        alert("Form submitted successfully!");
+        alert("Message sent successfully!");
         form.reset();
 
       } catch (error) {
         console.error(error);
-        alert(error.message);
+        alert(error.message || "Something went wrong");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Send Message";
       }
     });
   </script>
